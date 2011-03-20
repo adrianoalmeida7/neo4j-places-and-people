@@ -1,0 +1,16 @@
+- cadastrar pessoas OK
+- cadastrar lugares OK 
+
+- cadastrar viagens OK
+
+- atualizar versao do neo4j OK
+
+- remover relacionamento tem_tipo e usar uma propriedade nos nohs "tipo" e tem q ser indexado
+
+- dado um lugar, quem viajou pra l�? (talvez aqui precise indexar pelo nome do lugar)
+- dado uma pessoa, pra onde ela viajou?
+- dado um lugar, quem viajou pra l�, viajou tamb�m para onde?
+- quem s�o as pessoas que viajaram pro mesmo lugar q uma pessoa X?
+- qual foi o caminho percorrido por uma pessoa?
+- fazer diversos relacionamentos (viajou, morou, fez conexao) com propriedades... isso eh o q eh foda de fazer no
+relacional.
