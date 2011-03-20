@@ -8,8 +8,6 @@ import org.neo4j.kernel.EmbeddedGraphDatabase;
 import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
-import com.ahalmeida.neo4j.model.Relationships;
-
 @Component
 @RequestScoped
 public class DefaultNeo4JNodeExcluder implements Neo4JNodeExcluder {

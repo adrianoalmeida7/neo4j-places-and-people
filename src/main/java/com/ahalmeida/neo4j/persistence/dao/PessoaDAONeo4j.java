@@ -3,20 +3,15 @@ package com.ahalmeida.neo4j.persistence.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.Traverser;
-import org.neo4j.graphdb.Traverser.Order;
+import org.neo4j.index.IndexHits;
+import org.neo4j.index.lucene.LuceneIndexService;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
-import com.ahalmeida.neo4j.evaluators.TodosDeUmTipoEvaluator;
 import com.ahalmeida.neo4j.model.Pessoa;
-import com.ahalmeida.neo4j.model.Relationships;
 import com.ahalmeida.neo4j.persistence.neo.Neo4JNodeExcluder;
 
 @RequestScoped
@@ -25,23 +20,19 @@ public class PessoaDAONeo4j implements PessoaDAO {
 
 	private final EmbeddedGraphDatabase db;
 	private final Neo4JNodeExcluder excluder;
+	private final LuceneIndexService index;
 
-	public PessoaDAONeo4j(EmbeddedGraphDatabase db, Neo4JNodeExcluder excluder) {
+	public PessoaDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index, Neo4JNodeExcluder excluder) {
 		this.db = db;
+		this.index = index;
 		this.excluder = excluder;
 	}
 	
 	@Override
 	public List<Pessoa> todos() {
-		Node root = db.getReferenceNode();
-		
-		Traverser traverse = root.traverse(Order.DEPTH_FIRST,
-				StopEvaluator.DEPTH_ONE,
-				new TodosDeUmTipoEvaluator(Pessoa.class), Relationships.TEM_TIPO,
-				Direction.INCOMING);
-
+		IndexHits<Node> nodes = index.getNodes("tipo", Pessoa.class.getName());
 		List<Pessoa> lista = new ArrayList<Pessoa>();
-		for (Node node : traverse) {
+		for (Node node : nodes) {
 			lista.add(fromNode(node));
 		}
 		return lista;
@@ -49,7 +40,7 @@ public class PessoaDAONeo4j implements PessoaDAO {
 	
 	@Override
 	public void remove(long id) {
-		excluder.exclude(id, Relationships.TEM_TIPO);
+		excluder.exclude(id);
 	}
 	
 	@Override
@@ -69,8 +60,9 @@ public class PessoaDAONeo4j implements PessoaDAO {
 	public void salva(Pessoa p) {
 		Node node = db.createNode();
 		node.setProperty("nome", p.getNome());
-		Relationship relationship = node.createRelationshipTo(db.getReferenceNode(), Relationships.TEM_TIPO);
-		relationship.setProperty("tipo", Pessoa.class.getName());
+		node.setProperty("tipo", Pessoa.class.getName());
+
+		index.index(node, "tipo", Pessoa.class.getName());
 	}
 
 	@Override

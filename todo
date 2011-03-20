@@ -5,7 +5,7 @@
 
 - atualizar versao do neo4j OK
 
-- remover relacionamento tem_tipo e usar uma propriedade nos nohs "tipo" e tem q ser indexado
+- remover relacionamento tem_tipo e usar uma propriedade nos nohs "tipo" e tem q ser indexado OK
 
 - dado um lugar, quem viajou pra l�? (talvez aqui precise indexar pelo nome do lugar)
 - dado uma pessoa, pra onde ela viajou?
