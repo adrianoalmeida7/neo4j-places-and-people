@@ -13,6 +13,7 @@ import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 import com.ahalmeida.neo4j.model.Lugar;
+import com.ahalmeida.neo4j.model.infra.nodes.LugarNodeConverter;
 import com.ahalmeida.neo4j.persistence.neo.Neo4JNodeExcluder;
 
 @RequestScoped
@@ -26,10 +27,13 @@ public class LugarDAONeo4j implements LugarDAO {
 
 	private final LuceneIndexService index;
 
-	public LugarDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index , Neo4JNodeExcluder excluder) {
+	private final LugarNodeConverter lugarConverter;
+
+	public LugarDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index , Neo4JNodeExcluder excluder, LugarNodeConverter lugarConverter) {
 		this.db = db;
 		this.index = index;
 		this.excluder = excluder;
+		this.lugarConverter = lugarConverter;
 	}
 	
 	@Override
@@ -38,7 +42,7 @@ public class LugarDAONeo4j implements LugarDAO {
 
 		List<Lugar> lista = new ArrayList<Lugar>();
 		for (Node node : nodes) {
-			lista.add(fromNode(node));
+			lista.add(lugarConverter.fromNode(node));
 		}
 		return lista;
 	}
@@ -51,18 +55,9 @@ public class LugarDAONeo4j implements LugarDAO {
 	@Override
 	public Lugar findById(long id) {
 		Node node = db.getNodeById(id);
-		return fromNode(node);
+		return lugarConverter.fromNode(node);
 	}
 
-	private Lugar fromNode(Node node) {
-		Lugar lugar = new Lugar();
-		lugar.setId(node.getId());
-		lugar.setCidade((String)node.getProperty("cidade"));
-		lugar.setPais((String)node.getProperty("pais"));
-		
-		return lugar;
-	}
-	
 	public void salva(Lugar lugar) {
 		LOGGER.info("Salvando o lugar: " + lugar.getCidade());
 		Node node = db.createNode();

@@ -12,6 +12,7 @@ import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 import com.ahalmeida.neo4j.model.Pessoa;
+import com.ahalmeida.neo4j.model.infra.nodes.PessoaNodeConverter;
 import com.ahalmeida.neo4j.persistence.neo.Neo4JNodeExcluder;
 
 @RequestScoped
@@ -21,11 +22,13 @@ public class PessoaDAONeo4j implements PessoaDAO {
 	private final EmbeddedGraphDatabase db;
 	private final Neo4JNodeExcluder excluder;
 	private final LuceneIndexService index;
+	private final PessoaNodeConverter pessoaConverter;
 
-	public PessoaDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index, Neo4JNodeExcluder excluder) {
+	public PessoaDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index, Neo4JNodeExcluder excluder, PessoaNodeConverter pessoaConverter) {
 		this.db = db;
 		this.index = index;
 		this.excluder = excluder;
+		this.pessoaConverter = pessoaConverter;
 	}
 	
 	@Override
@@ -33,7 +36,7 @@ public class PessoaDAONeo4j implements PessoaDAO {
 		IndexHits<Node> nodes = index.getNodes("tipo", Pessoa.class.getName());
 		List<Pessoa> lista = new ArrayList<Pessoa>();
 		for (Node node : nodes) {
-			lista.add(fromNode(node));
+			lista.add(pessoaConverter.fromNode(node));
 		}
 		return lista;
 	}
@@ -46,17 +49,9 @@ public class PessoaDAONeo4j implements PessoaDAO {
 	@Override
 	public Pessoa findById(long id) {
 		Node node = db.getNodeById(id);
-		return fromNode(node);
+		return pessoaConverter.fromNode(node);
 	}
 
-	private Pessoa fromNode(Node node) {
-		Pessoa pessoa = new Pessoa();
-		pessoa.setId(node.getId());
-		pessoa.setNome((String)node.getProperty("nome"));
-		
-		return pessoa;
-	}
-	
 	public void salva(Pessoa p) {
 		Node node = db.createNode();
 		node.setProperty("nome", p.getNome());

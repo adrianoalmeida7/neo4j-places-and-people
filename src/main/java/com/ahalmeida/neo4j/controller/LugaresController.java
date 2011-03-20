@@ -13,16 +13,20 @@ import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 
 import com.ahalmeida.neo4j.model.Lugar;
+import com.ahalmeida.neo4j.model.Viagem;
 import com.ahalmeida.neo4j.persistence.dao.LugarDAO;
+import com.ahalmeida.neo4j.persistence.dao.ViagemDAO;
 
 @Resource
 public class LugaresController {
 	private final Logger LOG = Logger.getLogger(LugaresController.class);
 	private final Result result;
 	private LugarDAO dao;
+	private final ViagemDAO viagemDAO;
 
-	public LugaresController(LugarDAO dao, Result result) {
-		this.dao = dao; 
+	public LugaresController(LugarDAO dao, ViagemDAO viagemDAO, Result result) {
+		this.dao = dao;
+		this.viagemDAO = viagemDAO; 
 		this.result = result;
 	}
 		
@@ -30,6 +34,15 @@ public class LugaresController {
 	public void novo() {
 	}
 
+	@Path("/lugar/{id}")
+	@Get
+	public void show(long id) {
+		Lugar lugar = dao.findById(id);
+		List<Viagem> viagens = viagemDAO.quemViajouPara(lugar);
+		result.include("lugar", lugar);
+		result.include("viagens", viagens);
+	}
+	
 	@Path("/lugar/edit/{id}")
 	public Lugar edit(long id) {
 		return dao.findById(id);
