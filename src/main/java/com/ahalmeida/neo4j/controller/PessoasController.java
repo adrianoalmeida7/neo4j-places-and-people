@@ -13,16 +13,20 @@ import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 
 import com.ahalmeida.neo4j.model.Pessoa;
+import com.ahalmeida.neo4j.model.Viagem;
 import com.ahalmeida.neo4j.persistence.dao.PessoaDAO;
+import com.ahalmeida.neo4j.persistence.dao.ViagemDAO;
 
 @Resource
 public class PessoasController {
 	private final Logger LOG = Logger.getLogger(PessoasController.class);
 	private final Result result;
 	private final PessoaDAO dao;
+	private final ViagemDAO viagemDAO;
 
-	public PessoasController(PessoaDAO dao, Result result) {
+	public PessoasController(PessoaDAO dao, ViagemDAO viagemDAO, Result result) {
 		this.dao = dao;
+		this.viagemDAO = viagemDAO;
 		this.result = result;
 	}
 
@@ -35,6 +39,15 @@ public class PessoasController {
 		return dao.findById(id);
 	}
 
+	@Path("/pessoa/{id}")
+	@Get
+	public void show(long id) {
+		Pessoa pessoa = dao.findById(id);
+		List<Viagem> viagens = viagemDAO.paraOndeViajou(pessoa);
+		result.include("pessoa", pessoa);
+		result.include("viagens", viagens);
+	}
+	
 	@Put
 	@Path("pessoa")
 	public void update(Pessoa pessoa) {
