@@ -39,8 +39,10 @@ public class LugaresController {
 	public void show(long id) {
 		Lugar lugar = dao.findById(id);
 		List<Viagem> viagens = viagemDAO.quemViajouPara(lugar);
+		List<Lugar> lugaresTambemVisitados = dao.tambemVisitaramAPartirDe(lugar);
 		result.include("lugar", lugar);
 		result.include("viagens", viagens);
+		result.include("lugaresTambemVisitados", lugaresTambemVisitados);
 	}
 	
 	@Path("/lugar/edit/{id}")

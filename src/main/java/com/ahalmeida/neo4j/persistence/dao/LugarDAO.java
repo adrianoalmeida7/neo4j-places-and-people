@@ -14,4 +14,6 @@ public interface LugarDAO {
 	void salva(Lugar lugar);
 
 	void atualiza(Lugar lugar);
+	
+	List<Lugar> tambemVisitaramAPartirDe(Lugar lugar);
 }

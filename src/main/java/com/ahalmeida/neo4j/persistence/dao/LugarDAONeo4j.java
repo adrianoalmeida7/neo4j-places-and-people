@@ -5,9 +5,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.traversal.Evaluation;
+import org.neo4j.graphdb.traversal.Evaluator;
+import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.index.IndexHits;
 import org.neo4j.index.lucene.LuceneIndexService;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
+import org.neo4j.kernel.Traversal;
 
 import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
@@ -73,6 +78,30 @@ public class LugarDAONeo4j implements LugarDAO {
 		Node node = db.getNodeById(lugar.getId());
 		node.setProperty("cidade", lugar.getCidade());		
 		node.setProperty("pais", lugar.getPais());		
+	}
+
+	@Override
+	public List<Lugar> tambemVisitaramAPartirDe(Lugar lugar) {
+		Node node = db.getNodeById(lugar.getId());
+		List<Lugar> lugares = new ArrayList<Lugar>();
+		TraversalDescription td = Traversal.description().evaluator(
+				new Evaluator() {
+
+					@Override
+					public Evaluation evaluate(Path path) {
+						System.out.println("Length: " + path.length());
+						System.out.println("Start node: " + path.startNode());
+						System.out.println("End node: " + path.endNode());
+						if (path.length() == 2) {
+							return Evaluation.INCLUDE_AND_PRUNE;
+						}
+						return Evaluation.EXCLUDE_AND_CONTINUE;
+					}
+				});
+		for (Node res : td.traverse(node).nodes()) {
+			lugares.add(lugarConverter.fromNode(res));
+		}
+		return lugares;
 	}
 	
 }
