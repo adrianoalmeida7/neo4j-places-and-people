@@ -12,6 +12,7 @@ import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
 import com.ahalmeida.neo4j.model.Pessoa;
+import com.ahalmeida.neo4j.model.Relationships;
 import com.ahalmeida.neo4j.model.infra.nodes.PessoaNodeConverter;
 import com.ahalmeida.neo4j.persistence.neo.Neo4JNodeExcluder;
 
@@ -43,7 +44,7 @@ public class PessoaDAONeo4j implements PessoaDAO {
 	
 	@Override
 	public void remove(long id) {
-		excluder.exclude(id);
+		excluder.exclude(id, Relationships.START);
 	}
 	
 	@Override
@@ -54,9 +55,11 @@ public class PessoaDAONeo4j implements PessoaDAO {
 
 	public void salva(Pessoa p) {
 		Node node = db.createNode();
+		Node referenceNode = db.getReferenceNode();
+		referenceNode.createRelationshipTo(node, Relationships.START);
 		node.setProperty("nome", p.getNome());
 		node.setProperty("tipo", Pessoa.class.getName());
-
+		
 		index.index(node, "tipo", Pessoa.class.getName());
 	}
 
