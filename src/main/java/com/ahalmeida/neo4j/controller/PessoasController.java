@@ -44,8 +44,10 @@ public class PessoasController {
 	public void show(long id) {
 		Pessoa pessoa = dao.findById(id);
 		List<Viagem> viagens = viagemDAO.paraOndeViajou(pessoa);
+		List<Pessoa> quemViajouProsMesmosLugares = dao.quemViajouProsMesmosLugaresQue(pessoa);
 		result.include("pessoa", pessoa);
 		result.include("viagens", viagens);
+		result.include("quemViajouProsMesmosLugares", quemViajouProsMesmosLugares);
 	}
 	
 	@Put

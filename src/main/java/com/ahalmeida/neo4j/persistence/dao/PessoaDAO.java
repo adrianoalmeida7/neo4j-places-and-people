@@ -14,4 +14,6 @@ public interface PessoaDAO {
 	void salva(Pessoa pessoa);
 
 	void atualiza(Pessoa pessoa);
+
+	public abstract List<Pessoa> quemViajouProsMesmosLugaresQue(Pessoa p);
 }

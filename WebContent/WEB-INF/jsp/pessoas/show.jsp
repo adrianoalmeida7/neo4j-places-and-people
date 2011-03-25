@@ -9,3 +9,12 @@ Viagens feitas:
 	<li>${v.lugar.cidade} - ${v.lugar.pais} em <fmt:formatDate value="${v.data.time}" pattern="MM/dd/yyyy"/> </li>
 </c:forEach>
 </ul>
+
+<hr />
+
+Essas pessoas viajaram pros mesmos lugares que você:
+<ul>
+<c:forEach items="${quemViajouProsMesmosLugares}" var="p">
+	<li><a href="<c:url value="/pessoa/${p.id}" />">${p.nome}</a></li>
+</c:forEach>
+</ul>

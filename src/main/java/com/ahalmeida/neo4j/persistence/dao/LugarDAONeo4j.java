@@ -89,13 +89,18 @@ public class LugarDAONeo4j implements LugarDAO {
 
 					@Override
 					public Evaluation evaluate(Path path) {
+						
 						System.out.println("Length: " + path.length());
 						System.out.println("Start node: " + path.startNode());
 						System.out.println("End node: " + path.endNode());
-						if (path.length() == 2) {
+						if (path.length() == 2 && ! isReferenceNode(path.endNode())) {
 							return Evaluation.INCLUDE_AND_PRUNE;
 						}
 						return Evaluation.EXCLUDE_AND_CONTINUE;
+					}
+
+					private boolean isReferenceNode(Node node) {
+						return node.getId() == 0;
 					}
 				});
 		for (Node res : td.traverse(node).nodes()) {
