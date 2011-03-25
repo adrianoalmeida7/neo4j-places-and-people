@@ -3,7 +3,6 @@ package com.ahalmeida.neo4j.persistence.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.traversal.Evaluation;
@@ -17,37 +16,35 @@ import org.neo4j.kernel.Traversal;
 import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
-import com.ahalmeida.neo4j.model.Lugar;
-import com.ahalmeida.neo4j.model.infra.nodes.LugarNodeConverter;
+import com.ahalmeida.neo4j.model.Place;
+import com.ahalmeida.neo4j.model.infra.nodes.PlaceNodeConverter;
 import com.ahalmeida.neo4j.persistence.neo.Neo4JNodeExcluder;
 
 @RequestScoped
 @Component
-public class LugarDAONeo4j implements LugarDAO {
+public class PlaceDAONeo4j implements PlaceDAO {
 	
-	private static final Logger LOGGER = Logger.getLogger(LugarDAONeo4j.class); 
-
 	private final EmbeddedGraphDatabase db;
 	private final Neo4JNodeExcluder excluder;
 
 	private final LuceneIndexService index;
 
-	private final LugarNodeConverter lugarConverter;
+	private final PlaceNodeConverter placeConverter;
 
-	public LugarDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index , Neo4JNodeExcluder excluder, LugarNodeConverter lugarConverter) {
+	public PlaceDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index , Neo4JNodeExcluder excluder, PlaceNodeConverter placeConverter) {
 		this.db = db;
 		this.index = index;
 		this.excluder = excluder;
-		this.lugarConverter = lugarConverter;
+		this.placeConverter = placeConverter;
 	}
 	
 	@Override
-	public List<Lugar> todos() {
-		IndexHits<Node> nodes = index.getNodes("tipo", Lugar.class.getName());
+	public List<Place> all() {
+		IndexHits<Node> nodes = index.getNodes("type", Place.class.getName());
 
-		List<Lugar> lista = new ArrayList<Lugar>();
+		List<Place> lista = new ArrayList<Place>();
 		for (Node node : nodes) {
-			lista.add(lugarConverter.fromNode(node));
+			lista.add(placeConverter.fromNode(node));
 		}
 		return lista;
 	}
@@ -58,41 +55,37 @@ public class LugarDAONeo4j implements LugarDAO {
 	}
 	
 	@Override
-	public Lugar findById(long id) {
+	public Place findById(long id) {
 		Node node = db.getNodeById(id);
-		return lugarConverter.fromNode(node);
+		return placeConverter.fromNode(node);
 	}
 
-	public void salva(Lugar lugar) {
-		LOGGER.info("Salvando o lugar: " + lugar.getCidade());
+	public void save(Place lugar) {
 		Node node = db.createNode();
-		node.setProperty("cidade", lugar.getCidade());
-		node.setProperty("pais", lugar.getPais());
-		node.setProperty("tipo", Lugar.class.getName());
+		node.setProperty("city", lugar.getCity());
+		node.setProperty("country", lugar.getCountry());
+		node.setProperty("type", Place.class.getName());
 		
-		index.index(node, "tipo", Lugar.class.getName());
+		index.index(node, "type", Place.class.getName());
 	}
 
 	@Override
-	public void atualiza(Lugar lugar) {
+	public void update(Place lugar) {
 		Node node = db.getNodeById(lugar.getId());
-		node.setProperty("cidade", lugar.getCidade());		
-		node.setProperty("pais", lugar.getPais());		
+		node.setProperty("city", lugar.getCity());		
+		node.setProperty("country", lugar.getCountry());		
 	}
 
 	@Override
-	public List<Lugar> tambemVisitaramAPartirDe(Lugar lugar) {
-		Node node = db.getNodeById(lugar.getId());
-		List<Lugar> lugares = new ArrayList<Lugar>();
+	public List<Place> alsoVisitedFrom(Place place) {
+		Node node = db.getNodeById(place.getId());
+		List<Place> lugares = new ArrayList<Place>();
 		TraversalDescription td = Traversal.description().evaluator(
 				new Evaluator() {
 
 					@Override
 					public Evaluation evaluate(Path path) {
 						
-						System.out.println("Length: " + path.length());
-						System.out.println("Start node: " + path.startNode());
-						System.out.println("End node: " + path.endNode());
 						if (path.length() == 2 && ! isReferenceNode(path.endNode())) {
 							return Evaluation.INCLUDE_AND_PRUNE;
 						}
@@ -104,7 +97,7 @@ public class LugarDAONeo4j implements LugarDAO {
 					}
 				});
 		for (Node res : td.traverse(node).nodes()) {
-			lugares.add(lugarConverter.fromNode(res));
+			lugares.add(placeConverter.fromNode(res));
 		}
 		return lugares;
 	}

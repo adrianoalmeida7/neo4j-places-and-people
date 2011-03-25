@@ -1,12 +1,12 @@
 package com.ahalmeida.neo4j.model;
 
 
-public class Pessoa {
+public class Person {
 
 	private long id;
-	private String nome;
+	private String name;
 
-	public Pessoa() {
+	public Person() {
 	}
 	
 	public long getId() {
@@ -17,12 +17,12 @@ public class Pessoa {
 		this.id = id;
 	}
 	
-	public String getNome() {
-		return this.nome;
+	public String getName() {
+		return this.name;
 	}
 	
-	public void setNome(String nome) {
-		this.nome = nome;
+	public void setName(String nome) {
+		this.name = nome;
 	}
 	
 }

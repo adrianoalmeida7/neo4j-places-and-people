@@ -14,36 +14,36 @@ import org.neo4j.kernel.Traversal;
 import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.ioc.RequestScoped;
 
-import com.ahalmeida.neo4j.model.Pessoa;
+import com.ahalmeida.neo4j.model.Person;
 import com.ahalmeida.neo4j.model.Relationships;
-import com.ahalmeida.neo4j.model.infra.nodes.PessoaNodeConverter;
+import com.ahalmeida.neo4j.model.infra.nodes.PersonNodeConverter;
 import com.ahalmeida.neo4j.persistence.neo.Neo4JNodeExcluder;
 
 @RequestScoped
 @Component
-public class PessoaDAONeo4j implements PessoaDAO {
+public class PersonDAONeo4j implements PersonDAO {
 
 	private final EmbeddedGraphDatabase db;
 	private final Neo4JNodeExcluder excluder;
 	private final LuceneIndexService index;
-	private final PessoaNodeConverter pessoaConverter;
+	private final PersonNodeConverter personConverter;
 
-	public PessoaDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index,
-			Neo4JNodeExcluder excluder, PessoaNodeConverter pessoaConverter) {
+	public PersonDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index,
+			Neo4JNodeExcluder excluder, PersonNodeConverter personConverter) {
 		this.db = db;
 		this.index = index;
 		this.excluder = excluder;
-		this.pessoaConverter = pessoaConverter;
+		this.personConverter = personConverter;
 	}
 
 	@Override
-	public List<Pessoa> todos() {
-		IndexHits<Node> nodes = index.getNodes("tipo", Pessoa.class.getName());
-		List<Pessoa> lista = new ArrayList<Pessoa>();
+	public List<Person> all() {
+		IndexHits<Node> nodes = index.getNodes("type", Person.class.getName());
+		List<Person> list = new ArrayList<Person>();
 		for (Node node : nodes) {
-			lista.add(pessoaConverter.fromNode(node));
+			list.add(personConverter.fromNode(node));
 		}
-		return lista;
+		return list;
 	}
 
 	@Override
@@ -52,41 +52,41 @@ public class PessoaDAONeo4j implements PessoaDAO {
 	}
 
 	@Override
-	public Pessoa findById(long id) {
+	public Person findById(long id) {
 		Node node = db.getNodeById(id);
-		return pessoaConverter.fromNode(node);
+		return personConverter.fromNode(node);
 	}
 
-	public void salva(Pessoa p) {
+	public void save(Person p) {
 		Node node = db.createNode();
 		Node referenceNode = db.getReferenceNode();
 		referenceNode.createRelationshipTo(node, Relationships.START);
-		node.setProperty("nome", p.getNome());
-		node.setProperty("tipo", Pessoa.class.getName());
+		node.setProperty("name", p.getName());
+		node.setProperty("type", Person.class.getName());
 
-		index.index(node, "tipo", Pessoa.class.getName());
+		index.index(node, "type", Person.class.getName());
 	}
 
 	@Override
-	public void atualiza(Pessoa pessoa) {
-		Node node = db.getNodeById(pessoa.getId());
-		node.setProperty("nome", pessoa.getNome());
+	public void update(Person person) {
+		Node node = db.getNodeById(person.getId());
+		node.setProperty("name", person.getName());
 	}
 
 	@Override
-	public List<Pessoa> quemViajouProsMesmosLugaresQue(Pessoa p) {
-		List<Pessoa> pessoas = new ArrayList<Pessoa>();
+	public List<Person> whoTraveledToTheSamePlacesThan(Person p) {
+		List<Person> people = new ArrayList<Person>();
 		Node me = db.getNodeById(p.getId());
 		Iterable<Node> nodes = Traversal.description()
 				.evaluator(Evaluators.excludeStartPosition())
 				.evaluator(Evaluators.atDepth(2))
-				.relationships(Relationships.VIAJOU_PARA, Direction.BOTH)
+				.relationships(Relationships.TRAVELED_TO, Direction.BOTH)
 				.traverse(me).nodes();
 
 		for (Node node : nodes) {
-			pessoas.add(pessoaConverter.fromNode(node));
+			people.add(personConverter.fromNode(node));
 		}
 		
-		return pessoas;
+		return people;
 	}
 }
