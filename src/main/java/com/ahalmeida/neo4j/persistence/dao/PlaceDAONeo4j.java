@@ -5,13 +5,10 @@ import java.util.List;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.traversal.Evaluation;
-import org.neo4j.graphdb.traversal.Evaluator;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.traversal.Evaluators;
-import org.neo4j.graphdb.traversal.TraversalDescription;
-import org.neo4j.index.IndexHits;
-import org.neo4j.index.lucene.LuceneIndexService;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.Traversal;
 
@@ -21,6 +18,7 @@ import br.com.caelum.vraptor.ioc.RequestScoped;
 import com.ahalmeida.neo4j.model.Place;
 import com.ahalmeida.neo4j.model.Relationships;
 import com.ahalmeida.neo4j.model.infra.nodes.PlaceNodeConverter;
+import com.ahalmeida.neo4j.persistence.neo.IndexTypes;
 import com.ahalmeida.neo4j.persistence.neo.Neo4JNodeExcluder;
 
 @RequestScoped
@@ -30,11 +28,11 @@ public class PlaceDAONeo4j implements PlaceDAO {
 	private final EmbeddedGraphDatabase db;
 	private final Neo4JNodeExcluder excluder;
 
-	private final LuceneIndexService index;
 
 	private final PlaceNodeConverter placeConverter;
+	private final IndexManager index;
 
-	public PlaceDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index,
+	public PlaceDAONeo4j(EmbeddedGraphDatabase db, IndexManager index,
 			Neo4JNodeExcluder excluder, PlaceNodeConverter placeConverter) {
 		this.db = db;
 		this.index = index;
@@ -44,7 +42,9 @@ public class PlaceDAONeo4j implements PlaceDAO {
 
 	@Override
 	public List<Place> all() {
-		IndexHits<Node> nodes = index.getNodes("type", Place.class.getName());
+		//relying on strings for such thing is not a good idea.
+		Index<Node> typeIndex = index.forNodes(IndexTypes.PLACES.indexName());
+		IndexHits<Node> nodes = typeIndex.get("type", Place.class.getName());
 
 		List<Place> lista = new ArrayList<Place>();
 		for (Node node : nodes) {
@@ -69,8 +69,8 @@ public class PlaceDAONeo4j implements PlaceDAO {
 		node.setProperty("city", lugar.getCity());
 		node.setProperty("country", lugar.getCountry());
 		node.setProperty("type", Place.class.getName());
-
-		index.index(node, "type", Place.class.getName());
+		Index<Node> placeIndex = index.forNodes(IndexTypes.PLACES.indexName());
+		placeIndex.add(node, "type", Place.class.getName());
 	}
 
 	@Override

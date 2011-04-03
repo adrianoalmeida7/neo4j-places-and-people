@@ -42,7 +42,7 @@ public class TravelDAONeo4J implements TravelDAO {
 		r.setProperty("date", travel.getDate().getTimeInMillis());
 	}
 	
-	//TODO O paraOndeViajou e o quemViajouPara sao mto parecidos. Talvez possam ser simplificados
+	//TODO The following two methods are very similar, maybe they can be simplified
 	@Override
 	public List<Travel> traveledToWhere(Person person) {
 		Node personNode = db.getNodeById(person.getId());

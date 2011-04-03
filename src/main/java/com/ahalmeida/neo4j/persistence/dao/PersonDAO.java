@@ -16,4 +16,6 @@ public interface PersonDAO {
 	void update(Person person);
 
 	public abstract List<Person> whoTraveledToTheSamePlacesThan(Person p);
+
+	List<Person> findByName(String name);
 }

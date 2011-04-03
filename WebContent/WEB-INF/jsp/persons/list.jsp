@@ -1,6 +1,8 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<a href="<c:url value="/person/new" />">Add new person</a>
+<a href="<c:url value="/person/new" />">Add new person</a> -
+<a href="<c:url value="/person/filterByNameForm" />">Filter for someone</a> - 
+<a href="<c:url value="/persons" />">List all persons</a> 
 <hr />
 
 <c:forEach items="${personList}" var="p">

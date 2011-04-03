@@ -9,6 +9,7 @@ import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Put;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
+import br.com.caelum.vraptor.view.Results;
 
 import com.ahalmeida.neo4j.model.Person;
 import com.ahalmeida.neo4j.model.Travel;
@@ -29,6 +30,17 @@ public class PersonsController {
 
 	@Path("/person/new")
 	public void form() {
+	}
+
+	@Path("/person/filterByNameForm")
+	public void filterByNameForm() {
+	}
+	
+	@Path("/person/byName")
+	@Get
+	public void filterByName(String name) {
+		result.include("personList", dao.findByName(name));
+		result.use(Results.page()).of(PersonsController.class).list();
 	}
 
 	@Path("/person/edit/{id}")

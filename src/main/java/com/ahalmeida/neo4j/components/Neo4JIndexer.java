@@ -1,8 +1,6 @@
 package com.ahalmeida.neo4j.components;
 
-import javax.annotation.PreDestroy;
-
-import org.neo4j.index.lucene.LuceneIndexService;
+import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
@@ -11,21 +9,17 @@ import br.com.caelum.vraptor.ioc.ComponentFactory;
 
 @ApplicationScoped
 @Component
-public class Neo4JIndexer implements ComponentFactory<LuceneIndexService>{
+public class Neo4JIndexer implements ComponentFactory<IndexManager>{
 
-	private LuceneIndexService index;
+	private IndexManager index;
 
 	public Neo4JIndexer(EmbeddedGraphDatabase db) {
-		index = new LuceneIndexService(db);
+		index = db.index();
 	}
 	
 	@Override
-	public LuceneIndexService getInstance() {
+	public IndexManager getInstance() {
 		return this.index;
 	}
 	
-	@PreDestroy
-	public void destroy() {
-		index.shutdown();
-	}
 }

@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.traversal.Evaluators;
-import org.neo4j.index.IndexHits;
-import org.neo4j.index.lucene.LuceneIndexService;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.Traversal;
 
@@ -17,6 +19,7 @@ import br.com.caelum.vraptor.ioc.RequestScoped;
 import com.ahalmeida.neo4j.model.Person;
 import com.ahalmeida.neo4j.model.Relationships;
 import com.ahalmeida.neo4j.model.infra.nodes.PersonNodeConverter;
+import com.ahalmeida.neo4j.persistence.neo.IndexTypes;
 import com.ahalmeida.neo4j.persistence.neo.Neo4JNodeExcluder;
 
 @RequestScoped
@@ -25,10 +28,10 @@ public class PersonDAONeo4j implements PersonDAO {
 
 	private final EmbeddedGraphDatabase db;
 	private final Neo4JNodeExcluder excluder;
-	private final LuceneIndexService index;
+	private final IndexManager index;
 	private final PersonNodeConverter personConverter;
 
-	public PersonDAONeo4j(EmbeddedGraphDatabase db, LuceneIndexService index,
+	public PersonDAONeo4j(EmbeddedGraphDatabase db, IndexManager index,
 			Neo4JNodeExcluder excluder, PersonNodeConverter personConverter) {
 		this.db = db;
 		this.index = index;
@@ -38,7 +41,8 @@ public class PersonDAONeo4j implements PersonDAO {
 
 	@Override
 	public List<Person> all() {
-		IndexHits<Node> nodes = index.getNodes("type", Person.class.getName());
+		Index<Node> personsIndex = index.forNodes(IndexTypes.PERSONS.indexName());
+		IndexHits<Node> nodes = personsIndex.get("type", Person.class.getName());
 		List<Person> list = new ArrayList<Person>();
 		for (Node node : nodes) {
 			list.add(personConverter.fromNode(node));
@@ -57,14 +61,30 @@ public class PersonDAONeo4j implements PersonDAO {
 		return personConverter.fromNode(node);
 	}
 
+	@Override
+	public List<Person> findByName(String name) {
+		List<Person> persons = new ArrayList<Person>();
+		Index<Node> personsFullTextIndex = index.forNodes(IndexTypes.PERSONS_FULLTEXT.indexName(), MapUtil.stringMap("provider", "lucene", "type", "fulltext"));
+		IndexHits<Node> indexHits = personsFullTextIndex.query("name", name);
+		for (Node node : indexHits) {
+			System.out.println("found " + node);
+			persons.add(personConverter.fromNode(node));
+		}
+		return persons;
+	}
+
 	public void save(Person p) {
 		Node node = db.createNode();
 		Node referenceNode = db.getReferenceNode();
 		referenceNode.createRelationshipTo(node, Relationships.START);
 		node.setProperty("name", p.getName());
 		node.setProperty("type", Person.class.getName());
-
-		index.index(node, "type", Person.class.getName());
+		
+		Index<Node> personsIndex = index.forNodes(IndexTypes.PERSONS.indexName());
+		personsIndex.add(node, "type", Person.class.getName());
+		
+		Index<Node> personsFullTextIndex = index.forNodes(IndexTypes.PERSONS_FULLTEXT.indexName(), MapUtil.stringMap("provider", "lucene", "type", "fulltext"));
+		personsFullTextIndex.add(node, "name", p.getName());
 	}
 
 	@Override
