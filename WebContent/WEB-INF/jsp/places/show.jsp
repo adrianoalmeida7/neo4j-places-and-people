@@ -9,6 +9,15 @@ Travels done:
 	<li>${t.person.name} at <fmt:formatDate value="${t.date.time}" pattern="MM/dd/yyyy"/> </li>
 </c:forEach>
 </ul>
+<hr />
+
+Who lived at ${place.city}:
+<ul>
+<c:forEach items="${livedHistory}" var="l">
+	<li>${l.person.name} from <fmt:formatDate value="${l.startingAt.time}" pattern="MM/dd/yyyy"/> 
+	until <fmt:formatDate value="${l.until.time}" pattern="MM/dd/yyyy"/> </li>
+</c:forEach>
+</ul>
 
 <hr />
 Who went to ${place.city} also traveled to:

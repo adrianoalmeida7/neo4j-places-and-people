@@ -18,6 +18,7 @@ public class DefaultNeo4JNodeExcluder implements Neo4JNodeExcluder {
 		this.db = db;
 	}
 
+	//TODO - Nao precisa receber o types (o proprio node já devolve os relacionamentos existentes)
 	@Override
 	public void exclude(long id, RelationshipType... types) {
 		Node node = db.getNodeById(id);

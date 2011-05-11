@@ -10,8 +10,10 @@ import br.com.caelum.vraptor.Put;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 
+import com.ahalmeida.neo4j.model.LivedAt;
 import com.ahalmeida.neo4j.model.Place;
 import com.ahalmeida.neo4j.model.Travel;
+import com.ahalmeida.neo4j.persistence.dao.LivedAtDAO;
 import com.ahalmeida.neo4j.persistence.dao.PlaceDAO;
 import com.ahalmeida.neo4j.persistence.dao.TravelDAO;
 
@@ -19,11 +21,13 @@ import com.ahalmeida.neo4j.persistence.dao.TravelDAO;
 public class PlacesController {
 	private final Result result;
 	private PlaceDAO dao;
-	private final TravelDAO viagemDAO;
+	private final TravelDAO travelDAO;
+	private final LivedAtDAO livedAtDAO;
 
-	public PlacesController(PlaceDAO dao, TravelDAO viagemDAO, Result result) {
+	public PlacesController(PlaceDAO dao, TravelDAO travelDAO,LivedAtDAO livedAtDAO, Result result) {
 		this.dao = dao;
-		this.viagemDAO = viagemDAO; 
+		this.travelDAO = travelDAO;
+		this.livedAtDAO = livedAtDAO; 
 		this.result = result;
 	}
 		
@@ -35,10 +39,12 @@ public class PlacesController {
 	@Get
 	public void show(long id) {
 		Place place = dao.findById(id);
-		List<Travel> travels = viagemDAO.whoTraveledTo(place);
+		List<Travel> travels = travelDAO.whoTraveledTo(place);
+		List<LivedAt> livedHistory = livedAtDAO.whoLivedAt(place);
 		List<Place> placesAlsoVisited = dao.alsoVisitedFrom(place);
 		result.include("place", place);
 		result.include("travels", travels);
+		result.include("livedHistory", livedHistory);
 		result.include("placesAlsoVisited", placesAlsoVisited);
 	}
 	

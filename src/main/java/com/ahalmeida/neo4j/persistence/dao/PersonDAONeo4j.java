@@ -52,7 +52,7 @@ public class PersonDAONeo4j implements PersonDAO {
 
 	@Override
 	public void remove(long id) {
-		excluder.exclude(id, Relationships.START);
+		excluder.exclude(id, Relationships.START, Relationships.TRAVELED_TO);
 	}
 
 	@Override
