@@ -1,0 +1,40 @@
+h1. Neo4j Places and People
+
+Neo4j Places and People is an example project showing a way to use neo4j API, in order to model how people interacts with places, for instance, who lived where, and who traveled to where and when. The code sample has
+traversals and plain CRUD samples.
+
+The code was written in order to keep the application the most decoupled as possible from the Neo4j API.
+
+h2. Feature list
+
+You can find commonalities between people, such as:
+* Basic CRUD for people and places
+* Find out who are the people who visited the same places as you
+* Find places that have people in common
+* Find places that have been receiving "similar" visitors
+* Lucene indexing integration in order to search for people
+* Importer for the cities and somme dummy people data (in future)
+* JUnit tests to test traversals (Work in progress)
+
+h2. How to run the application
+
+In order to run the application, just clone it (or download it here, if you don't have a github account) and do the following: 
+<pre>
+mvn install:install-file -DgroupId=br.com.caelum -DartifactId=iogi -Dversion=0.8.2 -Dpackaging=jar -Dfile=lib/iogi-0.8.2.jar
+
+mvn jetty:run
+</pre>
+
+By default, the application will store the database at /tmp/graphdb. You can change this behavior, at
+the web.xml file, with a property called neo4j_database_dir.
+
+h2. Project dependencies
+
+The project depends upon VRaptor web framework and Neo4j.
+
+h2. Feedback
+
+You can always get in touch to give feedback:
+* Reporting bugs: Just report an issue, here at the github page
+* New code (features, refactoring and so on): Feel free to fork it and send pull requests
+* Doubts: You can easily reach me at twitter "@adrianoalmeida7":http://www.twitter.com/adrianoalmeida7
