@@ -33,7 +33,7 @@ public class Neo4JTransactionInterceptor implements Interceptor {
 		try {
 			stack.next(method, object);
 			tx.success();
-			LOG.info("Neo4J Transaction succesfull");
+			LOG.info("Neo4J Transaction succesful");
 		} finally {
 			tx.finish();
 			LOG.info("Neo4J Transaction finished");

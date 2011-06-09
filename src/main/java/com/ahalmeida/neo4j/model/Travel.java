@@ -7,6 +7,15 @@ public class Travel {
 	private Person person;
 	private Calendar date;
 
+	public Travel(Person person, Place place, Calendar date) {
+		this.person = person;
+		this.place = place;
+		this.date = date;
+	}
+
+	public Travel() {
+	}
+	
 	public Place getPlace() {
 		return place;
 	}

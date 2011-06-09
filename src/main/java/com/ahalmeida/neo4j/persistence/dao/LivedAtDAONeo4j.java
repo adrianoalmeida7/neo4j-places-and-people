@@ -15,7 +15,6 @@ import com.ahalmeida.neo4j.model.LivedAt;
 import com.ahalmeida.neo4j.model.Person;
 import com.ahalmeida.neo4j.model.Place;
 import com.ahalmeida.neo4j.model.Relationships;
-import com.ahalmeida.neo4j.model.Travel;
 import com.ahalmeida.neo4j.model.infra.nodes.PersonNodeConverter;
 import com.ahalmeida.neo4j.model.infra.nodes.PlaceNodeConverter;
 

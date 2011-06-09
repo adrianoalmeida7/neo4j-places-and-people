@@ -77,6 +77,7 @@ public class PersonDAONeo4j implements PersonDAO {
 		Node node = db.createNode();
 		Node referenceNode = db.getReferenceNode();
 		referenceNode.createRelationshipTo(node, Relationships.START);
+		p.setId(node.getId());
 		node.setProperty("name", p.getName());
 		node.setProperty("type", Person.class.getName());
 		

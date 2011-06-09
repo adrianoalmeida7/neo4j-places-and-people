@@ -9,6 +9,17 @@ public class LivedAt {
 	private Calendar startingAt;
 	private Calendar until;
 
+	public LivedAt(Person person, Place place, Calendar startingAt,
+			Calendar until) {
+		this.person = person;
+		this.place = place;
+		this.startingAt = startingAt;
+		this.until = until;
+	}
+
+	public LivedAt() {
+	}
+	
 	public Place getPlace() {
 		return place;
 	}

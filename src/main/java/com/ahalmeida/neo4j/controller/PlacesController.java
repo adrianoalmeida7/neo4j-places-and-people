@@ -20,12 +20,12 @@ import com.ahalmeida.neo4j.persistence.dao.TravelDAO;
 @Resource
 public class PlacesController {
 	private final Result result;
-	private PlaceDAO dao;
+	private PlaceDAO placeDao;
 	private final TravelDAO travelDAO;
 	private final LivedAtDAO livedAtDAO;
 
 	public PlacesController(PlaceDAO dao, TravelDAO travelDAO,LivedAtDAO livedAtDAO, Result result) {
-		this.dao = dao;
+		this.placeDao = dao;
 		this.travelDAO = travelDAO;
 		this.livedAtDAO = livedAtDAO; 
 		this.result = result;
@@ -38,25 +38,28 @@ public class PlacesController {
 	@Path("/place/{id}")
 	@Get
 	public void show(long id) {
-		Place place = dao.findById(id);
+		Place place = placeDao.findById(id);
 		List<Travel> travels = travelDAO.whoTraveledTo(place);
 		List<LivedAt> livedHistory = livedAtDAO.whoLivedAt(place);
-		List<Place> placesAlsoVisited = dao.alsoVisitedFrom(place);
+		List<Place> placesAlsoTraveled = placeDao.alsoTraveledAs(place);
+		List<Place> alsoPassedThroughAs = placeDao.alsoPassedThroughAs(place);
+		
 		result.include("place", place);
 		result.include("travels", travels);
 		result.include("livedHistory", livedHistory);
-		result.include("placesAlsoVisited", placesAlsoVisited);
+		result.include("placesAlsoTraveled", placesAlsoTraveled);
+		result.include("alsoPassedThroughAs", alsoPassedThroughAs);
 	}
 	
 	@Path("/place/edit/{id}")
 	public Place edit(long id) {
-		return dao.findById(id);
+		return placeDao.findById(id);
 	}
 
 	@Put
 	@Path("place")
 	public void update(Place place) {
-		dao.update(place);
+		placeDao.update(place);
 		result.redirectTo(PlacesController.class).list();
 	}
 	
@@ -64,20 +67,20 @@ public class PlacesController {
 	@Post
 	@Path("/place")
 	public void create(Place place) {
-		dao.save(place);
+		placeDao.save(place);
 		result.redirectTo(PlacesController.class).list();
 	}
 	
 	@Delete
 	@Path("/place/{id}")
 	public void delete(long id) {
-		dao.remove(id);
+		placeDao.remove(id);
 		result.redirectTo(PlacesController.class).list();
 	}
 	
 	@Get
 	@Path("/places")
 	public List<Place> list() {
-		return dao.all();
+		return placeDao.all();
 	}
 }

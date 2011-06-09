@@ -1,6 +1,6 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<a href="<c:url value="/place/new" />">Add new place</a>
+<a href="<c:url value="/place/new" />">Add new place</a> || <a href="<c:url value="/" />">Home</a>
 <hr />
 
 <c:forEach items="${placeList}" var="p">

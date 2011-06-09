@@ -15,5 +15,7 @@ public interface PlaceDAO {
 
 	void update(Place place);
 	
-	List<Place> alsoVisitedFrom(Place place);
+	List<Place> alsoTraveledAs(Place place);
+	
+	List<Place> alsoPassedThroughAs(Place place);
 }

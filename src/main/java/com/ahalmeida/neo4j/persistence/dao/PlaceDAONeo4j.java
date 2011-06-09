@@ -10,6 +10,7 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
+import org.neo4j.kernel.OrderedByTypeExpander;
 import org.neo4j.kernel.Traversal;
 
 import br.com.caelum.vraptor.ioc.Component;
@@ -28,7 +29,6 @@ public class PlaceDAONeo4j implements PlaceDAO {
 	private final EmbeddedGraphDatabase db;
 	private final Neo4JNodeExcluder excluder;
 
-
 	private final PlaceNodeConverter placeConverter;
 	private final IndexManager index;
 
@@ -42,7 +42,7 @@ public class PlaceDAONeo4j implements PlaceDAO {
 
 	@Override
 	public List<Place> all() {
-		//relying on strings for such thing is not a good idea.
+		// relying on strings for such thing is not a good idea.
 		Index<Node> typeIndex = index.forNodes(IndexTypes.PLACES.indexName());
 		IndexHits<Node> nodes = typeIndex.get("type", Place.class.getName());
 
@@ -64,10 +64,11 @@ public class PlaceDAONeo4j implements PlaceDAO {
 		return placeConverter.fromNode(node);
 	}
 
-	public void save(Place lugar) {
+	public void save(Place place) {
 		Node node = db.createNode();
-		node.setProperty("city", lugar.getCity());
-		node.setProperty("country", lugar.getCountry());
+		place.setId(node.getId());
+		node.setProperty("city", place.getCity());
+		node.setProperty("country", place.getCountry());
 		node.setProperty("type", Place.class.getName());
 		Index<Node> placeIndex = index.forNodes(IndexTypes.PLACES.indexName());
 		placeIndex.add(node, "type", Place.class.getName());
@@ -81,14 +82,36 @@ public class PlaceDAONeo4j implements PlaceDAO {
 	}
 
 	@Override
-	public List<Place> alsoVisitedFrom(Place place) {
+	public List<Place> alsoTraveledAs(Place place) {
 		Node node = db.getNodeById(place.getId());
 		List<Place> lugares = new ArrayList<Place>();
 		Iterable<Node> nodes = Traversal.description()
+		
 				.evaluator(Evaluators.atDepth(2))
 				.relationships(Relationships.TRAVELED_TO, Direction.BOTH)
 				.traverse(node).nodes();
+
+		for (Node res : nodes) {
+			lugares.add(placeConverter.fromNode(res));
+		}
+		return lugares;
+	}
+
+	@Override
+	public List<Place> alsoPassedThroughAs(Place place) {
+		Node originPlace = db.getNodeById(place.getId());
 		
+//		OrderedByTypeExpander expander = new OrderedByTypeExpander();
+//		expander.add(Relationships.LIVED_AT, Direction.INCOMING);
+//		expander.add(Relationships.TRAVELED_TO, Direction.INCOMING);
+		
+		Iterable<Node> nodes = Traversal.description()
+				.evaluator(Evaluators.atDepth(2))
+				.relationships(Relationships.LIVED_AT, Direction.BOTH)
+				.relationships(Relationships.TRAVELED_TO, Direction.BOTH)
+				.traverse(originPlace).nodes();
+
+		List<Place> lugares = new ArrayList<Place>();
 		for (Node res : nodes) {
 			lugares.add(placeConverter.fromNode(res));
 		}
