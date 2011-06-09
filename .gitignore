@@ -1,2 +1,7 @@
 graphdb
 classes
+*.swp
+target
+.classpath
+.project
+bin
